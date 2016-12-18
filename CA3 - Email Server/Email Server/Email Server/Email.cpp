@@ -72,9 +72,9 @@ void Email::setRecipients(const string recipients)
 	}
 }
 
-time_t Email::getDateTime() const 
+string Email::getDateTime() const 
 {
-	return dateTime;
+	return ctime(&dateTime);
 }
 
 void Email::setDateTime(const time_t &dateTime)

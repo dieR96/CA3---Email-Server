@@ -1,5 +1,8 @@
 #pragma once
+#include "Email.h"
 
+
+// main operations
 void mainMenu();
 void emailsMenu();
 void initialData();
@@ -9,6 +12,12 @@ void attachmentSearch();
 void addEmail();
 void sendEmail();
 void viewEmails();
-void deleteEmail();
-void deleteAllEmails();
-void clearEmails();
+void deleteUserEmail();
+void deleteAllUserEmails();
+void resetServer();
+
+// helper methods
+void getUserEmails();
+void getEmails();
+Email showEmail();
+void doDelete(Email message);

@@ -44,7 +44,7 @@ void Attachment::setFileName(const string &fileName)
 	}
 	else
 	{
-		this->fileName = "defaultFileName";
+		this->fileName = "default";
 	}
 }
 
@@ -63,7 +63,7 @@ void Attachment::setFileSuffix(const string &fileSuffix)
 	}
 	else
 	{
-		this->fileName = "defaultFileName";
+		this->fileName = "txt";
 	}
 	
 }
