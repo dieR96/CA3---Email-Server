@@ -1,6 +1,7 @@
 // regex code sources gathered from:
 // http://stackoverflow.com/questions/36903985/email-validation-in-c on 27/11/16 - 2:03AM
 // http://stackoverflow.com/questions/19605150/regex-for-password-must-be-contain-at-least-8-characters-least-1-number-and-bot on 27/11/16 - 2:07AM
+// http://stackoverflow.com/questions/18621491/password-validator-without-special-characters on 01/12/16 - 3:32PM
 
 #include "User.h"
 #include <regex>
@@ -15,10 +16,9 @@ User::User()
 
 User::User(string email, string userName, string password)
 {
-	// Required Validations:
-	// email - valid email regex
-	// userName - length >= 8
-	// password - length >= 8 and at least 1 number, not case-sensitive
+	setEmail(email);
+	setUserName(userName);
+	setPassword(password);
 }
 
 string User::getEmail() const
@@ -47,7 +47,7 @@ string User::getPassword() const
 
 void User::setPassword(const string& password)
 {
-	regex regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$"); // password regex here - 1 uppercase, lowercase and number regex
+	regex regex("(?![^a-zA-Z]*$|[^a-z0-9]*$|[^a-z<+$*]*$|[^A-Z0-9]*$|[^A-Z<+$*]*$|[^0-9<+$*]*$|.*[|;{}]).{8,}"); // password regex here - 1 uppercase, lowercase and number and size of at least 8 characters regex
 	if (regex_match(password, regex))
 	{
 		this->password = password;

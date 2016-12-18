@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="Attachment.h" />
     <ClInclude Include="Email.h" />
+    <ClInclude Include="server.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

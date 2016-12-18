@@ -11,15 +11,14 @@ Email::Email()
 
 }
 
-Email::Email(string sender, vector<string> recipients, time_t dateTime, string subject, string body, vector<Attachment> attachments)
+Email::Email(string sender, string recipients, time_t dateTime, string subject, string body, Attachment attachment)
 {
-	// Required Validations:
-	// sender - valid email regex
-	// recipients - valid emails regex
-	// dateTime - valid time object
-	// subject - optional requirement
-	// body - length >= 1 character
-	// attachments -properly created objects of attachment class objects
+	setSender(sender);
+	setRecipients(recipients);
+	setDateTime(dateTime);
+	setSubject(subject);
+	setBody(body);
+	setAttachment(attachment);
 }
 
 string Email::getSender() const
@@ -59,7 +58,7 @@ void Email::setRecipients(const string recipients)
 		{
 			validEmails = false;
 		}
-		recs.substr(recs.find_first_of(';') + 1);
+		recs = recs.substr(recs.find_first_of(';') + 1);
 
 	}
 	
@@ -123,14 +122,14 @@ void Email::setBody(const string &body)
 	}
 }
 
-vector<Attachment> Email::getAttachments() const
+Attachment Email::getAttachment() const
 {
-	return attachments;
+	return attachment;
 }
 
-void Email::setAttachments(const vector<Attachment> &attachments)
+void Email::setAttachment(const Attachment &attachment)
 {
-	this->attachments = attachments;
+	this->attachment = attachment;
 }
 
 string Email::print()
@@ -143,25 +142,9 @@ string Email::print()
 	time(&t);
 	stringstream time;
 	time << t;
-	// getting out file attachement information
-	int count = 0;
-	string attach = "";
 
-	for (Attachment a : attachments)
-	{
-		if (count == 0)
-		{
-			attach += (a.getFileName() + "." + a.getFileSuffix());
-		}
-		else
-		{
-			attach += ", " + (a.getFileName() + "." + a.getFileSuffix());
-		}
-		count++;
-	}
-	count = 0;
 
-	return "Email: [ sender = " + sender + " Recipients = "  + recipients + " Time Created = " + time.str()  + " Subject = " + subject + " Body = " + body + " Attachements = " + " ]";
+	return "Email: [ sender = " + sender + " Recipients = "  + recipients + " Time Created = " + time.str()  + " Subject = " + subject + " Body = " + body + " Attachment = " + attachment.print() + " ]";
 }
 Email::~Email()
 {
