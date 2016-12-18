@@ -6,6 +6,7 @@
 #include <set>
 #include <list>
 #include <algorithm>
+#include "TemplateQueue.h"
 
 using std::cin;
 using std::cout;
@@ -28,17 +29,15 @@ map<string, User> users;
 list<Email*> results;
 // holds created emails not yet sent to their recipents, cleared when user calls sends all pending emails
 list<Email*> drafts;
+// creates a queue for storing the data for sending out after creating some emails and store here before sending all of them at once in send emails function
+TemplateQueue<Email*> sendCache;
 
 // global variables that hold the current input from the user and email account they wish to view in the various functions
 string input;
 string targetEmail;
 
 
-
-
-
 // this file will house functions for each operation such as add, delete, delete all, etc, these functions will be called in the menu to keep menu to one function and tidy
-
 
 
 // function shows the looping main menu for the program, this will call the other functions in the server for operations the user has selected
@@ -173,25 +172,111 @@ void emailsMenu()
 
 void addEmail()
 {
+	string from;
+	string to;
+	string subject;
+	string body;
+	string answer;
+	string path;
+	time_t currentTime;
+	Attachment* file;
+
+
+	cout << "Enter in the Email Address this will come from" << endl;
+	getline(cin,from);
+	cout << "Enter in Email addresses separated by ; to send this email to, leave no spaces between emails" << endl;
+	getline(cin, to);
+	cout << "Enter in the Email subject" << endl;
+	getline(cin, subject);
+	cout << "Enter in the body of the Email" << endl;
+	getline(cin, body);
+	cout << "Would you like to add an attachment to this email?(Yes/No)" << endl;
+	getline(cin, answer);
+
+	
+	
+	if (answer == "yes" || answer == "Yes" || answer == "y" || answer == "Y")
+	{
+		cout << "Enter in the file path for your attachement" << endl;
+		getline(cin, path);
+		file = new Attachment(path.substr(0, path.find(".")), path.substr(path.find(".") + 1), path);
+	}
+	else
+	{
+		file = new Attachment("default","txt","default.txt");
+	}
+	
+	
+	
+	Email* newEmail = new Email(from, to + ";", time(&currentTime), subject, body, *file);
+	sendCache.storeObj(newEmail);
+
+
+	// clear memory up, destructor will handle the deletion of these variables later on
+	file = 0;
+	delete[] file;
+	newEmail = 0;
+	delete[] newEmail;
 
 }
 
 void sendEmail()
 {
+	
+	if (sendCache.sizeOfQueue() > 0)
+	{
+		Email* mail;
+		string recipients, recipient;
+		list<Email*> emails;
+
+		// while the queue is not empty
+		while (sendCache.sizeOfQueue() > 0)
+		{
+			// big operation to send to right email address
+			// get mail out from the queue and remove from the queue
+			mail = sendCache.frontObj();
+			sendCache.removeFrontObj();
+
+			// get out addresses to send this email to
+			recipients = mail->getRecipients();
+
+			// while all recipients have not had their mail sent yet
+			while (recipients != "")
+			{
+				// get address out and cut down string to one less to send to
+				recipient = recipients.substr(0, recipients.find(";"));
+				recipients = recipients.substr(recipients.find(";") + 1);
+				// get out user emails, add it on to the list and put back into the map of userEmails
+				emails = userEmails[recipient];
+				emails.push_back(mail);
+				userEmails[recipient] = emails;
+			}
+
+		}
+
+
+		cout << "All Emails have been successfully sent" << endl;
+	}
+	else
+	{
+
+
+		cout << "No Emails to send" << endl;
+	}
 
 }
 
 void viewEmails()
 {
 	cout << endl << "Enter in Email address from a list of emails: " << endl;
-	getUserEmailList();
+	getUserList();
 	showEmail();
 }
 
 void deleteUserEmail()
 {
 	cout << endl << "Enter in Email address from a list of emails: " << endl;
-	getUserEmailList();
+	getUserList();
 	Email *message = showEmail();
 
 	if (message)
@@ -218,16 +303,15 @@ void deleteUserEmail()
 
 }
 
-
 void deleteAllUserEmails()
 {
 	cout << endl << "Enter in Email address from a list of emails: " << endl;
 	// show user all users in the system to choose from
 	getUserList();
-	cin >> targetEmail;
+	getline(cin,targetEmail);
 	getUserEmailList();
 	cout << endl << "Are you sure that you want to delete all of this users emails that are listed above(Yes/No)?";
-	cin >> input;
+	getline(cin,input);
 
 	if (input == "Yes" || input == "Y" || input == "yes" || input == "y")
 	{
@@ -240,7 +324,7 @@ void deleteAllUserEmails()
 	{
 		cout << "All User Emails were not deleted" << endl;
 	}
-	getline(cin, input);
+	
 }
 
 void resetServer()
@@ -265,7 +349,6 @@ void resetServer()
 
 
 // searching method options
-
 void dateSearch()
 {
 
@@ -282,8 +365,8 @@ void attachmentSearch()
 }
 
 
-// helper functions
 
+// helper functions
 void getUserList()
 {
 	map<string, list<Email*>>::iterator iter = userEmails.begin();
@@ -298,19 +381,42 @@ void getUserList()
 
 void getUserEmailList()
 {
+	map<string, list<Email*>>::iterator iter = userEmails.begin();
+	bool validEmail = false;
 
-	results = userEmails[targetEmail];
-	
-	list<Email*>::iterator iter = results.begin();
-	
-	while (iter != results.end())
+	while (iter != userEmails.end())
 	{
-
-		cout << (*iter)->getSubject() << endl;///
-
+		if (targetEmail == iter->first)
+		{
+			
+			validEmail = true;
+		}
 		iter++;
 	}
-	iter = results.begin();
+	iter = userEmails.begin();
+
+	// check is a valid selection before continuing
+	if (validEmail)
+	{
+		results = userEmails[targetEmail];
+
+		list<Email*>::iterator iter2 = results.begin();
+
+		while (iter2 != results.end())
+		{
+
+			cout << (*iter2)->getSubject() << endl;
+			iter2++;
+		}
+		iter2 = results.begin();
+	}
+	else
+	{
+		list<Email*> blank;
+		results = blank;
+	}
+	
+	
 }
 
 Email* showEmail()
@@ -395,9 +501,9 @@ void initialData()
 
 	// creating some emails to use on startup of program so you have initial model set up for viewing the data
 	time_t currentTime;
-	Attachment file("data", "txt", "data.txt");
-	Email *email1 = new Email("VitaliyV@student.dkit.ie", "kieronpeters1@gmail.com;darrenreid@outlook.com;", time(&currentTime), "LinkedIn Profile Request", "Vitaliy asked you to like his profile page!", file);
-	Email *email2 = new Email("darrenreid@outlook.com", "kieronpeters1@gmail.com;", time(&currentTime), "Vitaliy on LinkedIn", "Don't add vitaliy, he wants use your profile to get work placement interview!", file);
+	Attachment* file = new Attachment("data", "txt", "data.txt");
+	Email* email1 = new Email("VitaliyV@student.dkit.ie", "kieronpeters1@gmail.com;darrenreid@outlook.com;", time(&currentTime), "LinkedIn Profile Request", "Vitaliy asked you to like his profile page!", *file);
+	Email* email2 = new Email("darrenreid@outlook.com", "kieronpeters1@gmail.com;", time(&currentTime), "Vitaliy on LinkedIn", "Don't add vitaliy, he wants use your profile to get work placement interview!", *file);
 	list<Email*> emails;
 	emails.push_back(email1);
 	emails.push_back(email2);
@@ -415,7 +521,9 @@ void initialData()
 
 	// cannot remove until I move the pointer to null as the emails in the list are pointers to these and deleting them, removes them from the list, so set to 0 first
 	email1 = 0;
-	delete email1;
+	delete[] email1;
 	email2 = 0;
-	delete email2;
+	delete[] email2;
+	file = 0;
+	delete[] file;
 }

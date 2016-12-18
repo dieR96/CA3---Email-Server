@@ -19,6 +19,9 @@ using std::istreambuf_iterator;
 Attachment::Attachment()
 {
 }
+
+
+
 Attachment::Attachment(const Attachment& att)
 {
 	this->size = att.size;
@@ -64,7 +67,7 @@ string Attachment::getFileName() const
 void Attachment::setFileName(const string &fileName)
 {
 	// regex for valid windows file name
-	regex regex("[a-z]{1,}|[A-Z]{1,}"); // Windows FileName regex here
+	regex regex("[a-zA-Z1-9]{1,}"); // Windows FileName regex here
 	if (regex_match(fileName, regex))
 	{
 		this->fileName = fileName;
@@ -83,7 +86,7 @@ string Attachment::getFileSuffix() const
 void Attachment::setFileSuffix(const string &fileSuffix)
 {
 	// regex for valid 2-3 character alphanumeric suffix
-	regex regex("[a-z][a-z][a-z]?|[A-Z][A-Z][A-Z]?"); // Windows File extension regex here
+	regex regex("[a-zA-Z][a-zA-Z][a-zA-Z]?"); // Windows File extension regex here
 	if (regex_match(fileSuffix, regex))
 	{
 		this->fileSuffix = fileSuffix;
@@ -103,7 +106,6 @@ string Attachment::getFileData() const
 void Attachment::setFileData(string file) // not sure about file data using a char, use string and convert to char in functions
 {
 	// check that the fileData char stream is not empty
-
 	ifstream in(file);
 
 	if (in)

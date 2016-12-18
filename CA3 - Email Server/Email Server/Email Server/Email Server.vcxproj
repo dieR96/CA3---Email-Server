@@ -144,6 +144,9 @@
   <ItemGroup>
     <ClCompile Include="Attachment.cpp" />
     <ClCompile Include="Email.cpp" />
+    <ClCompile Include="TemplateQueue.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="User.cpp" />
@@ -151,6 +154,7 @@
   <ItemGroup>
     <ClInclude Include="Attachment.h" />
     <ClInclude Include="Email.h" />
+    <ClInclude Include="TemplateQueue.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>

@@ -1,5 +1,5 @@
 ﻿  server.cpp
-i:\computing (hons) level 8 course\year 3\semester 1\c++\ca files\ca3 - email server\email server\email server\server.cpp(83): warning C4101: 'ia': unreferenced local variable
-i:\computing (hons) level 8 course\year 3\semester 1\c++\ca files\ca3 - email server\email server\email server\server.cpp(148): warning C4101: 'ia': unreferenced local variable
+i:\computing (hons) level 8 course\year 3\semester 1\c++\ca files\ca3 - email server\email server\email server\server.cpp(82): warning C4101: 'ia': unreferenced local variable
+i:\computing (hons) level 8 course\year 3\semester 1\c++\ca files\ca3 - email server\email server\email server\server.cpp(147): warning C4101: 'ia': unreferenced local variable
   Email Server.vcxproj -> I:\Computing (Hons) level 8 Course\Year 3\Semester 1\C++\CA Files\CA3 - Email Server\Email Server\Debug\Email Server.exe
   Email Server.vcxproj -> I:\Computing (Hons) level 8 Course\Year 3\Semester 1\C++\CA Files\CA3 - Email Server\Email Server\Debug\Email Server.pdb (Full PDB)
