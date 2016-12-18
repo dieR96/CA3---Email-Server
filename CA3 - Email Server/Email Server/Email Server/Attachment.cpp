@@ -1,27 +1,54 @@
-// regex code sources gathered from:
-// http://stackoverflow.com/questions/13122492/regular-expression-for-valid-folder-name-c-windows on 27/11/2016 - 2:12 AM
-// https://regex101.com/ on 27/11/2016 - used regularly for testing generated regex's written
-/* for reading in a file size : http://stackoverflow.com/questions/5840148/how-can-i-get-a-files-size-in-c */
+/* regex code sources gathered from:
+* http://stackoverflow.com/questions/13122492/regular-expression-for-valid-folder-name-c-windows on 27/11/2016 - 2:12 AM
+* https://regex101.com/ on 27/11/2016 - used regularly for testing generated regex's written
+ for reading in a file size : http://stackoverflow.com/questions/5840148/how-can-i-get-a-files-size-in-c */
 
 #include "Attachment.h"
 #include <regex>
 #include <iostream>
+#include <fstream>
 
 using std::regex;
 using std::regex_match;
 using std::cout;
+using std::ifstream;
+using std::istreambuf_iterator;
+
+
 
 Attachment::Attachment()
 {
 }
+Attachment::Attachment(const Attachment& att)
+{
+	this->size = att.size;
+	setFileName(att.fileName);
+	setFileSuffix(att.fileSuffix);
+	fileData = new char[att.size];
+	for (int i = 0; i < att.size; i++)
+	{
+		this->fileData[i] = att.fileData[i];
+	}
+}
 
-Attachment::Attachment(string fileName, string fileSuffix, char fileData[], int size)
+void Attachment::operator=(const Attachment& att)
+{
+	this->size = att.size;
+	setFileName(att.fileName);
+	setFileSuffix(att.fileSuffix);
+	fileData = new char[att.size];
+	for (int i = 0; i < att.size; i++)
+	{
+		this->fileData[i] = att.fileData[i];
+	}
+}
+
+Attachment::Attachment(string fileName, string fileSuffix, string file)
 {
 	this->size = size;
 	setFileName(fileName);
 	setFileSuffix(fileSuffix);
-	setFileData(fileData, size);
-	
+	setFileData(file);
 
 	// Required Validations:
 	// fileName - regex valid windows file name
@@ -65,7 +92,7 @@ void Attachment::setFileSuffix(const string &fileSuffix)
 	{
 		this->fileName = "txt";
 	}
-	
+
 }
 
 string Attachment::getFileData() const
@@ -73,12 +100,32 @@ string Attachment::getFileData() const
 	return fileData;
 }
 
-void Attachment::setFileData(char data[], int size) // not sure about file data using a char, use string and convert to char in functions
+void Attachment::setFileData(string file) // not sure about file data using a char, use string and convert to char in functions
 {
 	// check that the fileData char stream is not empty
-	if (size > 0)
+
+	ifstream in(file);
+
+	if (in)
 	{
-		fileData = data;
+		// read in the file into a streambuffer and iterate through the file to read it in
+		string contents((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
+
+		fileData = new char[contents.length()];
+		this->size = contents.length();
+		//fileData = strcpy(fileData, contents.c_str());
+		for (int i = 0; i < this->size; i++)
+		{
+			this->fileData[i] = contents[i];
+		}
+		// testing the file data is in the char array
+
+		cout << "File Data = " << fileData[0];
+		for (int i = 1; i < contents.length(); i++)
+		{
+			cout << ", " << fileData[i];
+		}
+
 	}
 	else
 	{
@@ -108,4 +155,6 @@ string Attachment::print() const
 
 Attachment::~Attachment()
 {
+	delete [] fileData;
+	fileData = 0;
 }

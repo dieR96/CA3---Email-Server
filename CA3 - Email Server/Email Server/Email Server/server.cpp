@@ -18,15 +18,16 @@ using std::list;
 using std::all_of;
 using std::any_of;
 using std::none_of;
+using std::invalid_argument;
 
 // houses all emails related to each user
-map<string, list<Email>> userEmails;
+map<string, list<Email*>> userEmails;
 // stores users in the file, won't be reset when user resets the server
 map<string, User> users;
 // holds data about the results of searches, global here to have easy access
-list<Email> results;
+list<Email*> results;
 // holds created emails not yet sent to their recipents, cleared when user calls sends all pending emails
-list<Email> drafts;
+list<Email*> drafts;
 
 // global variables that hold the current input from the user and email account they wish to view in the various functions
 string input;
@@ -79,7 +80,7 @@ void mainMenu()
 		{
 			choice = stoi(word);
 		}
-		catch (const std::invalid_argument& ia) 
+		catch (const invalid_argument& ia) 
 		{
 			cout << "Please enter in a number from 1-8 for you selection" << endl;
 			//cout << "Invalid argument: " << ia.what() << endl;
@@ -144,7 +145,7 @@ void emailsMenu()
 		try {
 			choice = stoi(word);
 		}
-		catch (const std::invalid_argument& ia) {
+		catch (const invalid_argument& ia) {
 			cout << "Please enter in a number from 1-4 for you selection" << endl;
 			//cout << "Invalid argument: " << ia.what() << endl;
 			choice = 0;
@@ -183,18 +184,17 @@ void sendEmail()
 void viewEmails()
 {
 	cout << endl << "Enter in Email address from a list of emails: " << endl;
-	getUserEmails();
+	getUserEmailList();
 	showEmail();
-
 }
 
 void deleteUserEmail()
 {
 	cout << endl << "Enter in Email address from a list of emails: " << endl;
-	getUserEmails();
-	Email message = showEmail();
+	getUserEmailList();
+	Email *message = showEmail();
 
-	if (&message)
+	if (message)
 	{
 		cout << "Are you sure that you want to delete this email(No/Yes)?";
 		cin >> input;
@@ -223,15 +223,16 @@ void deleteAllUserEmails()
 {
 	cout << endl << "Enter in Email address from a list of emails: " << endl;
 	// show user all users in the system to choose from
-	getUserEmails();
+	getUserList();
 	cin >> targetEmail;
+	getUserEmailList();
 	cout << endl << "Are you sure that you want to delete all of this users emails that are listed above(Yes/No)?";
 	cin >> input;
 
 	if (input == "Yes" || input == "Y" || input == "yes" || input == "y")
 	{
 		// clear the emails for this user key reference, needed to see this user contents, even if left blank when viewed
-		list<Email> blank;
+		list<Email*> blank;
 		userEmails[targetEmail] = blank;
 		cout << "All userEmails Deleted" << endl;
 	}
@@ -249,7 +250,7 @@ void resetServer()
 	drafts.empty();
 	input = "";
 	targetEmail = "";
-	map<string, list<Email>>::iterator iter = userEmails.begin();
+	map<string, list<Email*>>::iterator iter = userEmails.begin();
 
 	while (iter != userEmails.end())
 	{
@@ -283,49 +284,52 @@ void attachmentSearch()
 
 // helper functions
 
-void getUserEmails()
+void getUserList()
 {
-	map<string, list<Email>>::iterator iter = userEmails.begin();
-	
+	map<string, list<Email*>>::iterator iter = userEmails.begin();
 	while (iter != userEmails.end())
 	{
+		// show the user the list of each email in the map to choose from
 		cout << iter->first << endl;
 		iter++;
 	}
 	cout << endl;
 }
 
-void getEmails()
+void getUserEmailList()
 {
-	
-	results = userEmails[targetEmail];
-	list<Email>::iterator iter = results.begin();
 
+	results = userEmails[targetEmail];
+	
+	list<Email*>::iterator iter = results.begin();
+	
 	while (iter != results.end())
 	{
-		cout << iter->getSubject() << endl;
+
+		cout << (*iter)->getSubject() << endl;///
+
 		iter++;
 	}
 	iter = results.begin();
 }
 
-Email showEmail()
+Email* showEmail()
 {
-	Email message;
+	Email* message = 0;
 	cin >> targetEmail;
 	// get back a list of emails for the selected email address
-	getEmails();
+	getUserEmailList();
 	if (results.size() > 0)
 	{
 		cout << endl << "Now enter in the subject of message to view: " << endl;
 		getline(cin, input);
 		getline(cin, input);
-		list<Email>::iterator iter = results.begin();
+		list<Email*>::iterator iter = results.begin();
 		bool found = false;
 
 		while (iter != results.end() && !found)
 		{
-			if (iter->getSubject() == input)
+			if ((*iter)->getSubject() == input)
 			{
 				message = *iter;
 				found = true;
@@ -336,16 +340,16 @@ Email showEmail()
 		if (found)
 		{
 			cout << endl << endl << "Message content:" << endl;
-			cout << "Subject: " << message.getSubject() << endl;
-			cout << "Date Sent: " << message.getDateTime() << endl;
-			cout << "Sender: " << message.getSender() << endl;
-			cout << "Recipients: " << message.getRecipients() << endl;
-			cout << "Subject: " << message.getSubject() << endl << endl;
-			cout << message.getBody() << endl << endl;
+			cout << "Subject: " << message->getSubject() << endl;
+			cout << "Date Sent: " << message->getDateTime() << endl;
+			cout << "Sender: " << message->getSender() << endl;
+			cout << "Recipients: " << message->getRecipients() << endl;
+			cout << "Subject: " << message->getSubject() << endl << endl;
+			cout << message->getBody() << endl << endl;
 
-			if (message.getAttachment().getFileName() != "default")
+			if (message->getAttachment().getFileName() != "default")
 			{
-				cout << "Attachment: " << message.getAttachment().getFileName() << "." << message.getAttachment().getFileSuffix() << endl << endl;
+				cout << "Attachment: " << message->getAttachment().getFileName() << "." << message->getAttachment().getFileSuffix() << endl << endl;
 			}
 			else
 			{
@@ -366,13 +370,13 @@ Email showEmail()
 	return message;
 }
 
-void doDelete(Email message)
+void doDelete(Email* message)
 {
-	list<Email>::iterator iter = results.begin();
+	list<Email*>::iterator iter = results.begin();
 	
 	while (iter != results.end())
 	{
-		if (message.getSubject() == iter->getSubject())
+		if (message->getSubject() == (*iter)->getSubject())
 		{
 			iter = results.erase(iter);
 		}
@@ -391,23 +395,27 @@ void initialData()
 
 	// creating some emails to use on startup of program so you have initial model set up for viewing the data
 	time_t currentTime;
-	char contents[]{ 'D','A','T','A' };
-	Attachment file("data", "txt", contents, 4);
-	Email email1("VitaliyV@student.dkit.ie", "kieronpeters1@gmail.com;darrenreid@outlook.com;", time(&currentTime), "LinkedIn Profile Request", "Vitaliy asked you to like his profile page!", file);
-	Email email2("darrenreid@outlook.com", "kieronpeters1@gmail.com;", time(&currentTime), "Vitaliy on LinkedIn", "Don't add vitaliy, he wants use your profile to get work placement interview!", file);
-
-	list<Email> emails;
+	Attachment file("data", "txt", "data.txt");
+	Email *email1 = new Email("VitaliyV@student.dkit.ie", "kieronpeters1@gmail.com;darrenreid@outlook.com;", time(&currentTime), "LinkedIn Profile Request", "Vitaliy asked you to like his profile page!", file);
+	Email *email2 = new Email("darrenreid@outlook.com", "kieronpeters1@gmail.com;", time(&currentTime), "Vitaliy on LinkedIn", "Don't add vitaliy, he wants use your profile to get work placement interview!", file);
+	list<Email*> emails;
 	emails.push_back(email1);
 	emails.push_back(email2);
 	userEmails["kieronpeters1@gmail.com"] = emails;
-	list<Email> kp = userEmails.at("kieronpeters1@gmail.com");
-	list<Email>::iterator iter = kp.begin();
-
-	Email e;
+	list<Email*> kp = userEmails.at("kieronpeters1@gmail.com");
+	list<Email*>::iterator iter = kp.begin();
+	
+	Email* e;
 	while (iter != kp.end())
 	{
 		e = *iter;
-		cout << "Sender = " << e.print() << endl;
+		cout << "Sender = " << e->print() << endl;
 		iter++;
 	}
+
+	// cannot remove until I move the pointer to null as the emails in the list are pointers to these and deleting them, removes them from the list, so set to 0 first
+	email1 = 0;
+	delete email1;
+	email2 = 0;
+	delete email2;
 }

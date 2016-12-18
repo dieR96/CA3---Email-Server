@@ -17,7 +17,7 @@ void deleteAllUserEmails();
 void resetServer();
 
 // helper methods
-void getUserEmails();
-void getEmails();
-Email showEmail();
-void doDelete(Email message);
+void getUserList();
+void getUserEmailList();
+Email* showEmail();
+void doDelete(Email* message);

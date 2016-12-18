@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <iostream>
 #include "Attachment.h"
 
 using std::string;
@@ -21,12 +22,12 @@ private:
 	Attachment attachment; // using related class in attachment.h
 public:
 	Email();
-	Email(string sender, string recipients, time_t dateTime, string subject, string body, Attachment attachment);
+	Email(string sender, string recipients, time_t dateTime, string subject, string body, Attachment& attachment);
 	string getSender() const;
 	void setSender(const string &sender);
 	string getRecipients() const;
 	void setRecipients(const string recipients);
-	time_t getDateTime() const;
+	string getDateTime() const;
 	void setDateTime(const time_t &dateTime);
 	string  getSubject() const;
 	void setSubject(const string &subject);

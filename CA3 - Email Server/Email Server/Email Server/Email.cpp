@@ -11,7 +11,7 @@ Email::Email()
 
 }
 
-Email::Email(string sender, string recipients, time_t dateTime, string subject, string body, Attachment attachment)
+Email::Email(string sender, string recipients, time_t dateTime, string subject, string body, Attachment& attachment)
 {
 	setSender(sender);
 	setRecipients(recipients);
@@ -148,4 +148,5 @@ string Email::print()
 }
 Email::~Email()
 {
+	std::cout << "Email destroyed" << std::endl;
 }
