@@ -14,38 +14,15 @@ using std::cout;
 using std::ifstream;
 using std::istreambuf_iterator;
 
-
-
+// default constructor
 Attachment::Attachment()
 {
+	setFileName("default");
+	setFileSuffix("txt");
+	setFileData("default.txt");
 }
 
-
-
-Attachment::Attachment(const Attachment& att)
-{
-	this->size = att.size;
-	setFileName(att.fileName);
-	setFileSuffix(att.fileSuffix);
-	fileData = new char[att.size];
-	for (int i = 0; i < att.size; i++)
-	{
-		this->fileData[i] = att.fileData[i];
-	}
-}
-
-void Attachment::operator=(const Attachment& att)
-{
-	this->size = att.size;
-	setFileName(att.fileName);
-	setFileSuffix(att.fileSuffix);
-	fileData = new char[att.size];
-	for (int i = 0; i < att.size; i++)
-	{
-		this->fileData[i] = att.fileData[i];
-	}
-}
-
+// parameterised constructor
 Attachment::Attachment(string fileName, string fileSuffix, string file)
 {
 	this->size = size;
@@ -58,6 +35,84 @@ Attachment::Attachment(string fileName, string fileSuffix, string file)
 	// fileSuffix - regex 2-3 character alphanumeric suffix
 	// fileData - non-null character stream
 }
+
+// overloaded copy constructor
+Attachment::Attachment(const Attachment& att)
+{
+	this->size = att.size;
+	setFileName(att.fileName);
+	setFileSuffix(att.fileSuffix);
+	fileData = new char[att.size];
+	for (int i = 0; i < att.size; i++)
+	{
+		this->fileData[i] = att.fileData[i];
+	}
+}
+
+// overloaded assignment operator
+void Attachment::operator=(const Attachment& att)
+{
+	this->size = att.size;
+	setFileName(att.fileName);
+	setFileSuffix(att.fileSuffix);
+	fileData = new char[att.size];
+	for (int i = 0; i < att.size; i++)
+	{
+		this->fileData[i] = att.fileData[i];
+	}
+}
+
+
+// overloading of operators
+
+bool Attachment::operator==(const Attachment &att)
+{
+	if (this->fileName == att.fileName && this->fileSuffix == att.fileSuffix && this->fileData == att.fileData)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Attachment::operator!=(const Attachment &att)
+{
+	if (this->fileName != att.fileName || this->fileSuffix != att.fileSuffix || this->fileData != att.fileData)
+	{
+		return true;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+ostream& operator<<(ostream &out, const Attachment &att)
+{
+	out << "Attachment = file name: " << att.getFileName() << "." << att.getFileSuffix() << " file data: " << att.getFileData();
+	return out;
+}
+
+istream& operator>>(const istream &in, Attachment &att)
+{
+	// using a static cast to get non-constant istream out
+	istream* input = const_cast<istream*>(&in);
+
+	string garbage;
+	*input >> att.fileName;
+	*input >> garbage;
+	*input >> att.fileSuffix;
+	*input >> garbage;
+	*input >> att.fileData;
+	*input >> garbage;
+	return *input;
+}
+
+
+// getters and setters
+
 
 string Attachment::getFileName() const
 {

@@ -6,11 +6,21 @@ using std::stringstream;
 using std::regex;
 using std::regex_match;
 
+// default constructor
 Email::Email()
 {
+	setSender("defaultSender@mail.com");
+	setRecipients("defaultUser@mail.com");
+	time_t currentTime;
+	setDateTime(time(&currentTime));
+	setSubject("");
+	setBody("Default Body");
+	Attachment attachment;
+	setAttachment(attachment);
 
 }
 
+// parameterised constructor
 Email::Email(string sender, string recipients, time_t dateTime, string subject, string body, Attachment& attachment)
 {
 	setSender(sender);
@@ -20,6 +30,81 @@ Email::Email(string sender, string recipients, time_t dateTime, string subject, 
 	setBody(body);
 	setAttachment(attachment);
 }
+
+// overloaded copy constructor
+Email::Email(const Email &email)
+{
+	setSender(email.sender);
+	setRecipients(email.recipients);
+	setDateTime(email.dateTime);
+	setSubject(email.subject);
+	setBody(email.body);
+	setAttachment(email.attachment);
+}
+
+// overloaded assignment operator
+void Email::operator=(const Email &email)
+{
+	setSender(email.sender);
+	setRecipients(email.recipients);
+	setDateTime(email.dateTime);
+	setSubject(email.subject);
+	setBody(email.body);
+	setAttachment(email.attachment);
+}
+
+bool Email::operator==(const Email &email)
+{
+	if (this->sender == email.sender && this->recipients == email.recipients && this->dateTime == email.dateTime && this->subject == email.subject && this->body == email.body && this->attachment == email.attachment)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Email::operator!=(const Email &email)
+{
+	if (this->sender != email.sender || this->recipients != email.recipients || this->dateTime != email.dateTime || this->subject != email.subject || this->body != email.body || this->attachment != email.attachment)
+	{
+		return true;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+ostream& operator<<(ostream &out, const Email &email)
+{
+	out << "Email = Sender: " << email.sender << " Recipients: " << email.recipients << " date created: " << email.getDateTime() << " Subject: " << email.subject << " Body: " << email.body << " Attachment: " << email.attachment.print();
+	return out;
+}
+
+istream& operator>>(const istream &in, Email &email)
+{
+	// using a static cast to get non-constant istream out
+	istream* input = const_cast<istream*>(&in);
+	
+	string garbage;
+	*input >> email.sender;
+	*input >> garbage;
+	*input >> email.recipients;
+	*input >> garbage;
+	*input >> email.dateTime;
+	*input >> garbage;
+	*input >> email.subject;
+	*input >> garbage;
+	*input >> email.body;
+	*input >> garbage;
+	*input >> email.attachment;
+	*input >> garbage;
+	return *input;
+}
+
+
 
 string Email::getSender() const
 {
@@ -148,5 +233,4 @@ string Email::print()
 }
 Email::~Email()
 {
-	std::cout << "Email destroyed" << std::endl;
 }

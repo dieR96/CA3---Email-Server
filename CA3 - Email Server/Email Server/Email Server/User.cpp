@@ -5,21 +5,95 @@
 
 #include "User.h"
 #include <regex>
+#include <iostream>
 
+using std::cout;
+using std::cin;
+using std::istream;
+using std::ostream;
 using std::regex;
 using std::regex_match;
 
+// default constructor
 User::User()
 {
-
+	setEmail("defaultUser@mail.com");
+	setUserName("Default User");
+	setPassword("defaultPassword1");
 }
 
+// parameterised constructor
 User::User(string email, string userName, string password)
 {
 	setEmail(email);
 	setUserName(userName);
 	setPassword(password);
 }
+
+// copy constructor overload
+User::User(const User &user)
+{
+	setEmail(user.email);
+	setUserName(user.userName);
+	setPassword(user.password);
+}
+
+// assignment operator overload
+void User::operator=(const User &user)
+{
+	setEmail(user.email);
+	setUserName(user.userName);
+	setPassword(user.password);
+}
+
+// overloading of operators
+
+bool User::operator==(const User &user)
+{
+	if (this->email == user.email && this->password == user.password && this->userName == user.userName)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool User::operator!=(const User &user)
+{
+	if (this->email != user.email || this->password != user.password || this->userName != user.userName)
+	{
+		return true;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+ostream& operator<<(ostream &out, const User &user)
+{
+	out << "User = Username: " << user.getUserName() << " Password: " << user.getPassword() << "Email: " << user.getEmail();
+	return out;
+}
+
+istream& operator>>(const istream &in,User &user)
+{
+	// using a static cast to get non-constant istream out
+	istream* input = const_cast<istream*>(&in);
+
+	string garbage;
+	*input >> user.email;
+	*input >> garbage;
+	*input >> user.userName;
+	*input >> garbage;
+	*input >> user.password;
+	*input >> garbage;
+	return *input;
+}
+
+// getters and setters
 
 string User::getEmail() const
 {

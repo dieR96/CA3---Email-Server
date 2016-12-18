@@ -5,6 +5,8 @@
 #include <iostream>
 #include "Attachment.h"
 
+using std::istream;
+using std::ostream;
 using std::string;
 using std::vector;
 
@@ -23,6 +25,13 @@ private:
 public:
 	Email();
 	Email(string sender, string recipients, time_t dateTime, string subject, string body, Attachment& attachment);
+	Email(const Email &email);
+	void operator=(const Email &email);
+	bool operator==(const Email &email);
+	bool operator!=(const Email &email);
+	friend ostream& operator<<(ostream &out, const Email &email);
+	friend istream& operator>>(const istream &in, Email &email);
+
 	string getSender() const;
 	void setSender(const string &sender);
 	string getRecipients() const;
