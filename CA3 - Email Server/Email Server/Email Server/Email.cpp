@@ -162,6 +162,11 @@ string Email::getDateTime() const
 	return ctime(&dateTime);
 }
 
+time_t Email::getRawDateTime() const
+{
+	return dateTime;
+}
+
 void Email::setDateTime(const time_t &dateTime)
 {
 	// setting up time struct to analyse the time object passed in

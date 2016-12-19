@@ -37,6 +37,7 @@ public:
 	string getRecipients() const;
 	void setRecipients(const string recipients);
 	string getDateTime() const;
+	time_t getRawDateTime() const;
 	void setDateTime(const time_t &dateTime);
 	string  getSubject() const;
 	void setSubject(const string &subject);

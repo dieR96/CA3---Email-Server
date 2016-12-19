@@ -1,12 +1,16 @@
 #include "User.h"
 #include "server.h"
+#include "TemplateQueue.h"
+
 #include <iostream>
 #include <string>
 #include <map>
 #include <set>
 #include <list>
 #include <algorithm>
-#include "TemplateQueue.h"
+#include <regex>
+#include <sstream>
+
 
 using std::cin;
 using std::cout;
@@ -20,6 +24,9 @@ using std::all_of;
 using std::any_of;
 using std::none_of;
 using std::invalid_argument;
+using std::regex;
+using std::to_string;
+using std::stringstream;
 
 // houses all emails related to each user
 map<string, list<Email*>> userEmails;
@@ -79,7 +86,7 @@ void mainMenu()
 		{
 			choice = stoi(word);
 		}
-		catch (const invalid_argument& ia) 
+		catch (/*const invalid_argument& ia*/ invalid_argument) 
 		{
 			cout << "Please enter in a number from 1-8 for you selection" << endl;
 			//cout << "Invalid argument: " << ia.what() << endl;
@@ -89,30 +96,31 @@ void mainMenu()
 		switch (choice)
 		{
 		case 1:
-			cout << "New email here" << endl;
+			//cout << "New email here" << endl;
 			addEmail(); // add to list of emails, set who to get the email
 			break;
 		case 2:
-			cout << "Send email" << endl;
+			//cout << "Send email" << endl;
 			sendEmail(); // select email from existing email list for user enetered in, has emails the recieved and have composed, can choose email to send and enter in recipients to overwrite original recipient value
 			break;
 		case 3:
-			cout << "View previous emails" << endl;
+			//cout << "View previous emails" << endl;
 			viewEmails(); // show all emails for specified user out from the map
 			break;
 		case 4:
-			cout << "Delete specific user emails" << endl;
+			//cout << "Delete specific user emails" << endl;
 			deleteUserEmail(); // delete email from the list shown to the user of their emails
 			break;
 		case 5:
-			cout << "Delete all User emails" << endl;
+			//cout << "Delete all User emails" << endl;
 			deleteAllUserEmails(); // for a specific user delete all emails
 			break;
 		case 6:
+			//cout << "search menu here" << endl;
 			emailsMenu();
 			break;
 		case 7:
-			cout << "Reset Server Data" << endl;
+			//cout << "Reset Server Data" << endl;
 			// will empty out everything from the maps and lists email objects, except the users themselves
 			resetServer();
 			break;
@@ -130,13 +138,22 @@ void emailsMenu()
 	string word;
 	int choice = 0;
 	do {
+		// help on declaring array of function pointers available at http://stackoverflow.com/questions/5093090/array-of-function-pointers-without-a-typedef accessed on 16/12/2016 11:55pm
+
+		// store three search functions into an array of function pointers declared size of 3 that takes no parameters and return a list of emails found
+		void(*functs[3])();
+		// fill array funct with the names of the three search functions here
+		functs[0] = dateSearch;
+		functs[1] = subjectSearch;
+		functs[2] = attachmentSearch;
+
 
 		cout << "Search Emails Menu" << endl;
 		cout << "Please select what you would like to do:" << endl << endl << endl;
 
 		cout << " > 1. Search emails by date range" << endl;
 		cout << " > 2. Search emails by subject" << endl;
-		cout << " > 3. Search emails containing attachements" << endl;
+		cout << " > 3. Search emails containing attachments" << endl;
 		cout << " > 4. Return to main Menu" << endl;
 		
 		getline(cin, word);
@@ -144,27 +161,45 @@ void emailsMenu()
 		try {
 			choice = stoi(word);
 		}
-		catch (const invalid_argument& ia) {
+		catch (/*const invalid_argument& ia*/ invalid_argument) {
 			cout << "Please enter in a number from 1-4 for you selection" << endl;
 			//cout << "Invalid argument: " << ia.what() << endl;
 			choice = 0;
 		}
+		
+		// much smaller code than below for the switch cases
+		if (choice >= 1 && choice < 4)
+		{
+			// subtract one due to arrays starting at index position 0
+			functs[choice - 1]();
+		}
 
+
+		// could use but same as above with the array pointers now
+		/*
 		switch (choice)
 		{
 		case 1:
-			cout << "Search by date range here" << endl;
-			dateSearch();
+			//cout << "Search by date range here" << endl;
+			functs[0]();
+			// same operation as above does
+			//dateSearch();
 			break;
 		case 2:
-			cout << "Search by subject here" << endl;
-			subjectSearch();
+			//cout << "Search by subject here" << endl;
+			functs[1]();
+			// same operation as above does
+			//subjectSearch();
 			break;
 		case 3:
-			cout << "Search by having attachments here" << endl;
-			attachmentSearch();
+			//cout << "Search by having attachments here" << endl;
+			functs[2]();
+			// same operation as above does
+			//attachmentSearch();
 			break;
 		}
+		*/
+
 
 	} while (choice != 4);
 }
@@ -348,21 +383,212 @@ void resetServer()
 }
 
 
-// searching method options
+
+
+// searching method options, used as function pointers in the search menu of the emails
 void dateSearch()
 {
+	//cout << "running the date function" << endl;
+	int eDay, eMonth, eYear, lDay, lMonth, lYear;
+	char garbage;
+
+	cout << "enter in the earliest date range to search from in the format DD/MM/YYYY" << endl;
+	cin >> eDay >> garbage >> eMonth >> garbage >> eYear;
+	cout << "enter in the latest date range to search to in the format DD/MM/YYYY" << endl;
+	cin >> lDay >> garbage >> lMonth >> garbage >> lYear;
+
+	// regex found and modified from: http://stackoverflow.com/questions/51224/regular-expression-to-match-valid-dates/8768241#8768241 accessed on 17/12/2016 at 1:20AM
+	// regex testing extensive and cannot work out why is showing up invalid when tested so left it out of this method for regex validation on the dates
+	//regex regex("([1-9]|[12][0-9]|3[01])([- .])([1-9]|1[012])\2(19|20)[0123456789][0123456789]");
+
+	// check valid ranges of input for max allowed for longest month, 12 months and valid year from 1970 to 2050
+	if (eDay > 0 && eDay < 32 && eMonth > 0 && eMonth < 13 && eYear > 1969 && eYear < 2051 && lDay > 0 && lDay < 32 && lMonth > 0 && lMonth < 13 && lYear > 1969 && lYear < 2051)
+	{
+		// create time objects from the inputs
+		time_t earliestDate;
+		time_t latestDate;
+		// get current time for now
+		time(&earliestDate);
+		time(&latestDate);
+		// use a struct to alter the times to the users inputs
+		struct tm * earliest;
+		earliest = gmtime(&earliestDate);
+		// set those times correctly offset for the format the tm struct uses
+		// set the time_t objects ready for use in the loop with comparing them for the email date checking
+		earliest->tm_mday = eDay;
+		earliest->tm_mon = eMonth - 1;
+		earliest->tm_year = eYear - 1900;
+		earliestDate = mktime(earliest);
+
+		// second struct needed independent to other as caused same year to be set on them all for some strange reason unknown to me
+		struct tm * latest;
+		latest = gmtime(&latestDate);
+		latest->tm_mday = lDay;
+		latest->tm_mon = lMonth - 1;
+		latest->tm_year = lYear - 1900;
+		latestDate = mktime(latest);
+		time_t now;
+		time(&now);
+
+		// testing for outputs and calculations
+		/*
+		cout << earliestDate << endl;
+		cout << latestDate << endl;
+		
+		cout << now << endl;
+		cout << (earliestDate < latestDate) << endl;
+		*/
+
+		// validation for dates in right order and is no greater than now in date range searches
+		if (earliestDate < latestDate && latestDate <= now)
+		{
+			// carry out actual search here using first iterator of all emails in the map of users
+			map<string, list<Email*>>::const_iterator mapIter = userEmails.begin();
+			// setting list pointers for storing the map data and results of the matching emails to the criteria of valid date ranges
+			list<Email*> emails;
+			list<Email*> searchResults;
+			while (mapIter != userEmails.end())
+			{
+				emails = mapIter->second;
+				
+				for (Email* e : emails)
+				{
+					if (e->getRawDateTime() >= earliestDate && e->getRawDateTime() <= latestDate)
+					{
+						searchResults.push_back(e);
+					}
+				}
+
+				mapIter++;
+			}
+			
+			if (searchResults.size() > 0)
+			{
+				int count = 0;
+				for (Email* e : searchResults)
+				{
+					count++;
+					// reuse the code for showing out a message here
+					cout << endl << endl << "Message (" << count << "/" << searchResults.size() << ") content:" << endl;
+					cout << "Subject: " << e->getSubject() << endl;
+					cout << "Date Sent: " << e->getDateTime() << endl;
+					cout << "Sender: " << e->getSender() << endl;
+					cout << "Recipients: " << e->getRecipients() << endl;
+					cout << "Subject: " << e->getSubject() << endl << endl;
+					cout << e->getBody() << endl << endl;
+
+					// same check for existing attachment file
+					if (e->getAttachment().getFileName() != "default")
+					{
+						cout << "Attachment: " << e->getAttachment().getFileName() << "." << e->getAttachment().getFileSuffix() << endl << endl;
+					}
+					else
+					{
+						cout << "Attachment: None" << endl << endl;
+					}
+				}
+
+			}
+			else
+			{
+				cout << "Sorry, no Emails to show that match these ranges of dates in the server" << endl;
+			}
+
+
+
+
+		}
+		else
+		{
+			cout << "Please enter in a valid date range in the correct order and lower than a date not past today!!" << endl;
+		}
+	}
+	else
+	{
+		cout << "please enter in valid dates to search for" << endl;
+	}
+
+
 
 }
 
 void subjectSearch()
 {
+	//cout << "running the subject function" << endl;
+
+	string searchSubject;
+	cout << "Enter in the subject of the emails you are searching for" << endl;
+	getline(cin, searchSubject);
+
+
+	// carry out actual search here using first iterator of all emails in the map of users
+	map<string, list<Email*>>::const_iterator mapIter = userEmails.begin();
+	// setting list pointers for storing the map data and results of the matching emails to the criteria of matching subjects
+	list<Email*> emails;
+	list<Email*> searchResults;
+	while (mapIter != userEmails.end())
+	{
+		emails = mapIter->second;
+
+		for (Email* e : emails)
+		{
+			// matches the subject in the email, add to the list of results if so
+			if (e->getSubject() == searchSubject)
+			{
+				searchResults.push_back(e);
+			}
+		}
+
+		mapIter++;
+	}
+
+	if (searchResults.size() > 0)
+	{
+		int count = 0;
+		for (Email* e : searchResults)
+		{
+			count++;
+			// reuse the code for showing out a message here
+			cout << endl << endl << "Message (" << count << "/" << searchResults.size() << ") content:" << endl;
+			cout << "Subject: " << e->getSubject() << endl;
+			cout << "Date Sent: " << e->getDateTime() << endl;
+			cout << "Sender: " << e->getSender() << endl;
+			cout << "Recipients: " << e->getRecipients() << endl;
+			cout << "Subject: " << e->getSubject() << endl << endl;
+			cout << e->getBody() << endl << endl;
+
+			// same check for existing attachment file
+			if (e->getAttachment().getFileName() != "default")
+			{
+				cout << "Attachment: " << e->getAttachment().getFileName() << "." << e->getAttachment().getFileSuffix() << endl << endl;
+			}
+			else
+			{
+				cout << "Attachment: None" << endl << endl;
+			}
+		}
+	}
+	else
+	{
+		cout << "Sorry, no Emails to show that match this subject in the server" << endl;
+	}
 
 }
 
 void attachmentSearch()
 {
+	//cout << "running the attachment function" << endl;
+
+	// using std library function to check if any emails in the list now has an attachment
+	// use in the has attachment function
+	//if (any_of(emails.begin(), emails.end(), [](Email e) {return e.getSubject == "target"; }))
+	//{
+
+	//}
 
 }
+
+
 
 
 
@@ -416,6 +642,8 @@ void getUserEmailList()
 		results = blank;
 	}
 	
+
+
 	
 }
 
