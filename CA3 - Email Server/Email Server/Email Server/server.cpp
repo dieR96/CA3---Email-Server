@@ -382,9 +382,6 @@ void resetServer()
 
 }
 
-
-
-
 // searching method options, used as function pointers in the search menu of the emails
 void dateSearch()
 {
@@ -464,6 +461,8 @@ void dateSearch()
 			
 			if (searchResults.size() > 0)
 			{
+				// sorting the data based on the overloaded greater than operator in the email class in ascending order
+				searchResults.sort();
 				int count = 0;
 				for (Email* e : searchResults)
 				{
@@ -493,10 +492,6 @@ void dateSearch()
 			{
 				cout << "Sorry, no Emails to show that match these ranges of dates in the server" << endl;
 			}
-
-
-
-
 		}
 		else
 		{
@@ -507,9 +502,6 @@ void dateSearch()
 	{
 		cout << "please enter in valid dates to search for" << endl;
 	}
-
-
-
 }
 
 void subjectSearch()
@@ -520,30 +512,121 @@ void subjectSearch()
 	cout << "Enter in the subject of the emails you are searching for" << endl;
 	getline(cin, searchSubject);
 
+	// if the regex does not match, then the user is shown their input error
+	regex subjectRegex("[0-9A-ZA-z ]*");	
+	if (regex_match(searchSubject, subjectRegex))
+	{
+		// carry out actual search here using first iterator of all emails in the map of users
+		map<string, list<Email*>>::const_iterator mapIter = userEmails.begin();
+		// setting list pointers for storing the map data and results of the matching emails to the criteria of matching subjects
+		list<Email*> emails;
+		list<Email*> searchResults;
+		string statement;
+		string word;
+		int pos;
+		while (mapIter != userEmails.end())
+		{
+			// getting out the list for each user email in turn in this while loop
+			emails = mapIter->second;
+
+			// for every email this user has, we check for any word the types is contained in the subject matter
+			for (Email* e : emails)
+			{
+				// refilling string for next email to search, adding space onto string in order to search it
+				statement = searchSubject + " ";
+				// for each word in the sentence is checked for a match until string is empty
+				while (statement != "")
+				{
+					// taking out first word
+					word = statement.substr(0, statement.find_first_of(" "));
+					statement = statement.substr(statement.find_first_of(" ") + 1);
+					// matches the subject in the email, add to the list of results if so, pos returns match in position to found value, -1 if not so we know this email matches if greater than -1
+					pos = e->getSubject().find(word);
+					if (pos >= 0)
+					{
+						searchResults.push_back(e);
+					}
+				}
+				
+			}
+
+			mapIter++;
+		}
+
+		if (searchResults.size() > 0)
+		{
+			// sorting the data based on the overloaded greater than operator in the email class in ascending order
+			searchResults.sort();
+			int count = 0;
+			for (Email* e : searchResults)
+			{
+				count++;
+				// reuse the code for showing out a message here
+				cout << endl << endl << "Message (" << count << "/" << searchResults.size() << ") content:" << endl;
+				cout << "Subject: " << e->getSubject() << endl;
+				cout << "Date Sent: " << e->getDateTime() << endl;
+				cout << "Sender: " << e->getSender() << endl;
+				cout << "Recipients: " << e->getRecipients() << endl;
+				cout << "Subject: " << e->getSubject() << endl << endl;
+				cout << e->getBody() << endl << endl;
+
+				// same check for existing attachment file
+				if (e->getAttachment().getFileName() != "default")
+				{
+					cout << "Attachment: " << e->getAttachment().getFileName() << "." << e->getAttachment().getFileSuffix() << endl << endl;
+				}
+				else
+				{
+					cout << "Attachment: None" << endl << endl;
+				}
+			}
+		}
+		else
+		{
+			cout << "Sorry, no Emails to show that match this subject in the server" << endl;
+		}
+
+	}
+	else
+	{
+		cout << "Please enter in a subject without special characters" << endl;
+	}
+
+}
+
+void attachmentSearch()
+{
+	//cout << "running the attachment function" << endl;
 
 	// carry out actual search here using first iterator of all emails in the map of users
 	map<string, list<Email*>>::const_iterator mapIter = userEmails.begin();
-	// setting list pointers for storing the map data and results of the matching emails to the criteria of matching subjects
+	// setting list pointers for storing the map data and results of the matching emails to the criteria of having an attachment in the email
 	list<Email*> emails;
 	list<Email*> searchResults;
+
 	while (mapIter != userEmails.end())
 	{
 		emails = mapIter->second;
-
-		for (Email* e : emails)
+		// using std library function to check if any emails in the list now has an attachment, checking default.txt is not the file name to execute that loop of functions
+		if (any_of(emails.begin(), emails.end(), [](Email* e) {return (*e).getAttachment().getFileName() != "default"; }))
 		{
-			// matches the subject in the email, add to the list of results if so
-			if (e->getSubject() == searchSubject)
+			// do the actual loop for finding the emails in the list of emails that have an existing attachment
+			for (Email* e : emails)
 			{
-				searchResults.push_back(e);
+				// matches the attachment in the email, add to the list of results if so
+				if (e->getAttachment().getFileName() != "default")
+				{
+					searchResults.push_back(e);
+				}
 			}
 		}
-
 		mapIter++;
 	}
 
 	if (searchResults.size() > 0)
 	{
+		// sorting the data based on the overloaded greater than operator in the email class in ascending order
+		searchResults.sort();
 		int count = 0;
 		for (Email* e : searchResults)
 		{
@@ -570,27 +653,10 @@ void subjectSearch()
 	}
 	else
 	{
-		cout << "Sorry, no Emails to show that match this subject in the server" << endl;
+		cout << "Sorry, no Emails to show that contain attachments in the server" << endl;
 	}
 
 }
-
-void attachmentSearch()
-{
-	//cout << "running the attachment function" << endl;
-
-	// using std library function to check if any emails in the list now has an attachment
-	// use in the has attachment function
-	//if (any_of(emails.begin(), emails.end(), [](Email e) {return e.getSubject == "target"; }))
-	//{
-
-	//}
-
-}
-
-
-
-
 
 // helper functions
 void getUserList()
@@ -723,19 +789,25 @@ void doDelete(Email* message)
 	userEmails[targetEmail] = results;
 }
 
-
 void initialData()
 {
 
 	// creating some emails to use on startup of program so you have initial model set up for viewing the data
 	time_t currentTime;
 	Attachment* file = new Attachment("data", "txt", "data.txt");
-	Email* email1 = new Email("VitaliyV@student.dkit.ie", "kieronpeters1@gmail.com;darrenreid@outlook.com;", time(&currentTime), "LinkedIn Profile Request", "Vitaliy asked you to like his profile page!", *file);
-	Email* email2 = new Email("darrenreid@outlook.com", "kieronpeters1@gmail.com;", time(&currentTime), "Vitaliy on LinkedIn", "Don't add vitaliy, he wants use your profile to get work placement interview!", *file);
+	Attachment* file2 = new Attachment();
+	Email* email1 = new Email("vitaliyvasyltsiv@msn.com", "kieronpeters1@gmail.com;darrenreid@hotmail.com;", time(&currentTime), "LinkedIn Profile Request", "Vitaliy asked you to like his profile page!", *file);
+	Email* email2 = new Email("darrenreid@hotmail.com", "kieronpeters1@gmail.com;", time(&currentTime), "Vitaliy on LinkedIn", "Don't add vitaliy, he wants use your profile to get work placement interview!", *file2);
 	list<Email*> emails;
 	emails.push_back(email1);
 	emails.push_back(email2);
 	userEmails["kieronpeters1@gmail.com"] = emails;
+	emails.clear();
+	userEmails["darrenreid@hotmail.com"] = emails;
+	userEmails["dandansong@yahoo.ie"] = emails;
+	userEmails["tunleang@student.dkit.ie"] = emails;
+	userEmails["vitaliyvasyltsiv@msn.com"] = emails;
+
 	list<Email*> kp = userEmails.at("kieronpeters1@gmail.com");
 	list<Email*>::iterator iter = kp.begin();
 	
@@ -754,4 +826,6 @@ void initialData()
 	delete[] email2;
 	file = 0;
 	delete[] file;
+	file2 = 0;
+	delete[] file2;
 }
