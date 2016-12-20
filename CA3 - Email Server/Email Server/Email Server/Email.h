@@ -10,9 +10,6 @@ using std::ostream;
 using std::string;
 using std::vector;
 
-
-// still need operator overloading functions
-// still need copy constructor
 class Email
 {
 private:
@@ -31,7 +28,6 @@ public:
 	bool operator!=(const Email &email);
 	friend ostream& operator<<(ostream &out, const Email &email);
 	friend istream& operator>>(const istream &in, Email &email);
-
 	string getSender() const;
 	void setSender(const string &sender);
 	string getRecipients() const;

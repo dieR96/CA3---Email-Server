@@ -7,8 +7,7 @@ using std::string;
 using std::istream;
 using std::ostream;
 
-// still need operator overloading functions
-// still need copy constructor
+
 class Attachment
 {
 private:
@@ -25,7 +24,6 @@ public:
 	bool operator!=(const Attachment &att);
 	friend ostream& operator<<(ostream &out, const Attachment &att);
 	friend istream& operator>>(const istream &in, Attachment &att);
-
 	string getFileName() const;
 	void setFileName(const string &fileName);
 	string getFileSuffix() const;

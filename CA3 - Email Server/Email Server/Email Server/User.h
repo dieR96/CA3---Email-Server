@@ -10,8 +10,6 @@ using std::cout;
 using std::string;
 
 
-// still need operator overloading functions
-// still need copy constructor
 class User
 {
 private:
@@ -27,7 +25,6 @@ public:
 	bool operator!=(const User &user);
 	friend ostream& operator<<(ostream &out,const User &user);
 	friend istream& operator>>(const istream &in, User &user);
-
 	string getEmail() const;
 	void setEmail(const string& email);
 	string getPassword() const;

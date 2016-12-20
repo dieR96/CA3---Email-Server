@@ -27,6 +27,7 @@ using std::invalid_argument;
 using std::regex;
 using std::to_string;
 using std::stringstream;
+using std::swap;
 
 // houses all emails related to each user
 map<string, list<Email*>> userEmails;
@@ -53,6 +54,7 @@ void mainMenu()
 	// call function to set up data in the program initially, data is not saved in the program yet, so all changes and restart of the program reset all data
 	initialData();
 
+	// main server intro display the user will see on start up
 
 	cout << "______ _     ___  ___      _ _   _____ _____   _____                          " << endl;
 	cout << "|  _  \\ |    |  \\/  |     (_) | |_   _|_   _| /  ___|                         " << endl;
@@ -132,6 +134,7 @@ void mainMenu()
 	} while (choice != 8);
 }
 
+// second menu displayed when you want to search for certain emails
 void emailsMenu()
 {
 
@@ -150,7 +153,6 @@ void emailsMenu()
 
 		cout << "Search Emails Menu" << endl;
 		cout << "Please select what you would like to do:" << endl << endl << endl;
-
 		cout << " > 1. Search emails by date range" << endl;
 		cout << " > 2. Search emails by subject" << endl;
 		cout << " > 3. Search emails containing attachments" << endl;
@@ -204,7 +206,7 @@ void emailsMenu()
 	} while (choice != 4);
 }
 
-
+// gets the necessary information from the user about the data they want to store in a new emails and option of specifying the attachment for the email as well
 void addEmail()
 {
 	string from;
@@ -216,7 +218,6 @@ void addEmail()
 	time_t currentTime;
 	Attachment* file;
 
-
 	cout << "Enter in the Email Address this will come from" << endl;
 	getline(cin,from);
 	cout << "Enter in Email addresses separated by ; to send this email to, leave no spaces between emails" << endl;
@@ -227,21 +228,19 @@ void addEmail()
 	getline(cin, body);
 	cout << "Would you like to add an attachment to this email?(Yes/No)" << endl;
 	getline(cin, answer);
-
 	
-	
+	// logic for specifying an attachment or default one will be used
 	if (answer == "yes" || answer == "Yes" || answer == "y" || answer == "Y")
 	{
 		cout << "Enter in the file path for your attachement" << endl;
 		getline(cin, path);
+		// may not work for file name as path with directory will go all the way up to the first . in it
 		file = new Attachment(path.substr(0, path.find(".")), path.substr(path.find(".") + 1), path);
 	}
 	else
 	{
 		file = new Attachment("default","txt","default.txt");
 	}
-	
-	
 	
 	Email* newEmail = new Email(from, to + ";", time(&currentTime), subject, body, *file);
 	sendCache.storeObj(newEmail);
@@ -255,6 +254,7 @@ void addEmail()
 
 }
 
+// send all emails stored in the templated queue
 void sendEmail()
 {
 	
@@ -301,6 +301,7 @@ void sendEmail()
 
 }
 
+// show email from the list after selecting a user of emails to view
 void viewEmails()
 {
 	cout << endl << "Enter in Email address from a list of emails: " << endl;
@@ -308,12 +309,14 @@ void viewEmails()
 	showEmail();
 }
 
+// methods that allows you to select a specific email from a specific user to delete
 void deleteUserEmail()
 {
 	cout << endl << "Enter in Email address from a list of emails: " << endl;
 	getUserList();
 	Email *message = showEmail();
 
+	// logic finds the email if it exists and what choice they give for the email
 	if (message)
 	{
 		cout << "Are you sure that you want to delete this email(No/Yes)?";
@@ -321,6 +324,7 @@ void deleteUserEmail()
 
 		if (input == "Yes" || input == "Y" || input == "yes" || input == "y")
 		{
+			// helper method that deletes the specified email
 			doDelete(message);
 			cout << "Email Deleted" << endl;
 		}
@@ -333,11 +337,9 @@ void deleteUserEmail()
 	{
 		cout << "invalid email name, please enter in a valid email from the list" << endl;
 	}
-
-
-
 }
 
+// deletes every email from a specified user upon confirmation of the operation
 void deleteAllUserEmails()
 {
 	cout << endl << "Enter in Email address from a list of emails: " << endl;
@@ -348,6 +350,7 @@ void deleteAllUserEmails()
 	cout << endl << "Are you sure that you want to delete all of this users emails that are listed above(Yes/No)?";
 	getline(cin,input);
 
+	// logic check for user confirmation of delete all emails
 	if (input == "Yes" || input == "Y" || input == "yes" || input == "y")
 	{
 		// clear the emails for this user key reference, needed to see this user contents, even if left blank when viewed
@@ -362,6 +365,7 @@ void deleteAllUserEmails()
 	
 }
 
+// reset option in main menu
 void resetServer()
 {
 	// clearing all global data out from the structures and return to default initialisation state;
@@ -387,12 +391,36 @@ void dateSearch()
 {
 	//cout << "running the date function" << endl;
 	int eDay, eMonth, eYear, lDay, lMonth, lYear;
-	char garbage;
+	string first, second;
+	
+	//char garbage;
 
 	cout << "enter in the earliest date range to search from in the format DD/MM/YYYY" << endl;
-	cin >> eDay >> garbage >> eMonth >> garbage >> eYear;
+	getline(cin,first);
+	//cin >> eDay >> garbage >> eMonth >> garbage >> eYear;
 	cout << "enter in the latest date range to search to in the format DD/MM/YYYY" << endl;
-	cin >> lDay >> garbage >> lMonth >> garbage >> lYear;
+	getline(cin, second);
+	//cin >> lDay >> garbage >> lMonth >> garbage >> lYear;
+
+	// check both regex's match for input being correct
+	
+	try
+	{
+		// try to read in valid input from the user
+		eDay = stoi(first.substr(0, first.find_first_of("/")));
+		eMonth = stoi(first.substr(first.find_first_of("/") + 1, first.find_last_of("/")));
+		eYear = stoi(first.substr(first.find_last_of("/") + 1));
+		lDay = stoi(second.substr(0, second.find_first_of("/")));
+		lMonth = stoi(second.substr(second.find_first_of("/") + 1, second.find_last_of("/")));
+		lYear = stoi(second.substr(second.find_last_of("/") + 1));
+	}
+	catch (/*const invalid_argument& ia*/ invalid_argument)
+	{
+		cout << "Please enter in the format suggested" << endl;
+		//cout << "Invalid argument: " << ia.what() << endl;
+		// if statement never runs as checks only if eday is right && won't carry equating this statment after that, so user has to try again
+		eDay = 0;
+	}
 
 	// regex found and modified from: http://stackoverflow.com/questions/51224/regular-expression-to-match-valid-dates/8768241#8768241 accessed on 17/12/2016 at 1:20AM
 	// regex testing extensive and cannot work out why is showing up invalid when tested so left it out of this method for regex validation on the dates
@@ -461,8 +489,14 @@ void dateSearch()
 			
 			if (searchResults.size() > 0)
 			{
+				// new sorting function to sort the list alphabetically by subject string title using a bubbleSort 
+				sortBySubject(searchResults);
+
+				// old sorting method using the standard template library function .sort()
 				// sorting the data based on the overloaded greater than operator in the email class in ascending order
-				searchResults.sort();
+				//searchResults.sort();
+
+
 				int count = 0;
 				for (Email* e : searchResults)
 				{
@@ -504,6 +538,7 @@ void dateSearch()
 	}
 }
 
+// searches for a specified sentence as a subject by each word on every email in the server and returns their content to the user
 void subjectSearch()
 {
 	//cout << "running the subject function" << endl;
@@ -523,6 +558,7 @@ void subjectSearch()
 		list<Email*> searchResults;
 		string statement;
 		string word;
+		bool added = false;
 		int pos;
 		while (mapIter != userEmails.end())
 		{
@@ -532,6 +568,7 @@ void subjectSearch()
 			// for every email this user has, we check for any word the types is contained in the subject matter
 			for (Email* e : emails)
 			{
+
 				// refilling string for next email to search, adding space onto string in order to search it
 				statement = searchSubject + " ";
 				// for each word in the sentence is checked for a match until string is empty
@@ -542,12 +579,14 @@ void subjectSearch()
 					statement = statement.substr(statement.find_first_of(" ") + 1);
 					// matches the subject in the email, add to the list of results if so, pos returns match in position to found value, -1 if not so we know this email matches if greater than -1
 					pos = e->getSubject().find(word);
-					if (pos >= 0)
+					if (pos >= 0 && !added)
 					{
+						// adding the email, added boolean check will prevent an added email being added again in the statement loop and rest before next while loop new email is ran
 						searchResults.push_back(e);
+						added = true;
 					}
 				}
-				
+				added = false;
 			}
 
 			mapIter++;
@@ -555,8 +594,13 @@ void subjectSearch()
 
 		if (searchResults.size() > 0)
 		{
+			// new sorting function to sort the list alphabetically by subject string title using a bubbleSort 
+			sortBySubject(searchResults);
+
+			// old sorting method using the standard template library function .sort()
 			// sorting the data based on the overloaded greater than operator in the email class in ascending order
-			searchResults.sort();
+			//searchResults.sort();
+
 			int count = 0;
 			for (Email* e : searchResults)
 			{
@@ -594,6 +638,7 @@ void subjectSearch()
 
 }
 
+// simpler search that returns any email in the sever that has a valid attachment that the user can view all of these at once
 void attachmentSearch()
 {
 	//cout << "running the attachment function" << endl;
@@ -625,8 +670,14 @@ void attachmentSearch()
 
 	if (searchResults.size() > 0)
 	{
+		// new sorting function to sort the list alphabetically by subject string title using a bubbleSort 
+		sortBySubject(searchResults);
+		
+		// old sorting method using the standard template library function .sort()
 		// sorting the data based on the overloaded greater than operator in the email class in ascending order
-		searchResults.sort();
+		//searchResults.sort();
+		
+		
 		int count = 0;
 		for (Email* e : searchResults)
 		{
@@ -659,6 +710,8 @@ void attachmentSearch()
 }
 
 // helper functions
+
+// gets a list of users back before user has to type the one they want in
 void getUserList()
 {
 	map<string, list<Email*>>::iterator iter = userEmails.begin();
@@ -671,6 +724,7 @@ void getUserList()
 	cout << endl;
 }
 
+// shows back a specified users email subject for user to pick the email they would like to view
 void getUserEmailList()
 {
 	map<string, list<Email*>>::iterator iter = userEmails.begin();
@@ -707,12 +761,9 @@ void getUserEmailList()
 		list<Email*> blank;
 		results = blank;
 	}
-	
-
-
-	
 }
 
+// shows a specific emails details out to the user, reused in multiple functions such as delete a specific email by showing it before delete confirmation is asked of the user
 Email* showEmail()
 {
 	Email* message = 0;
@@ -770,6 +821,7 @@ Email* showEmail()
 	return message;
 }
 
+// carries out the specific email deletion from the user and reinserts the list with that one deleted that matches the subject
 void doDelete(Email* message)
 {
 	list<Email*>::iterator iter = results.begin();
@@ -789,10 +841,51 @@ void doDelete(Email* message)
 	userEmails[targetEmail] = results;
 }
 
+void sortBySubject(list<Email*> &searchResults)
+{
+	// getting two iterators to first and next email value for comparing in sorting algorithm
+	list<Email*>::iterator current;
+	list<Email*>::iterator next;
+	Email* nextMail, *currentMail;
+	int end = searchResults.size();
+
+	// as I am not sure about sorting with iterators for insertions, I went with a longer bubbleSort for this program, had problems with swap using pointers to emails
+	// had to dereference the mail from iterator and swap it with iterator, the iterator_swap and swap wouldn't work when iterated to show the sorting working, made
+	// no difference and the insertion on a small result set would not cost much in time for this small email server
+	while (end != 0)
+	{
+		// setting iterators for first and next value up for next loop through the list to sort it
+		current = searchResults.begin();
+		next = searchResults.begin();
+		next++;
+
+		// inner sort getting one short off the end each time to sort with bubbleSort algorithm on the email pointer list
+		for (int pos = 1; pos < end; pos++)
+		{
+			// take references of actual emails
+			nextMail = *next;
+			currentMail = *current;
+			// compare their subjects alphabetically
+			if (nextMail->getSubject() < currentMail->getSubject())
+			{
+				// swap elements to correct alphabetical order by subject title
+				swap(*nextMail, *currentMail);
+			}
+			// increment iterators for next two element comparances
+			next++;
+			current++;
+		}
+		// end gets closer to 0 to stop this outer loop without causing iterators to go out of memory location of the list, carful with using pointers
+		end--;
+	}
+}
+
+// initial state of the server or start up or after choosing the reset option
 void initialData()
 {
-
-	// creating some emails to use on startup of program so you have initial model set up for viewing the data
+	// creating some emails to use on startup of program so you have initial model set up for viewing some emails with and without attachments, note - attachments files are assumed to be in the project folder
+	// see the folder for data.txt used below, you can specify the full file where the program asks for the path to the file, this is just initial test, so depends on where you are running this program from
+	// for how the file paths will work
 	time_t currentTime;
 	Attachment* file = new Attachment("data", "txt", "data.txt");
 	Attachment* file2 = new Attachment();
@@ -803,11 +896,16 @@ void initialData()
 	emails.push_back(email2);
 	userEmails["kieronpeters1@gmail.com"] = emails;
 	emails.clear();
+	emails.push_back(email1);
 	userEmails["darrenreid@hotmail.com"] = emails;
+	emails.clear();
 	userEmails["dandansong@yahoo.ie"] = emails;
 	userEmails["tunleang@student.dkit.ie"] = emails;
 	userEmails["vitaliyvasyltsiv@msn.com"] = emails;
 
+
+	// test data that prints out at very start and on the reset option display of all information of emails from my user
+	/*
 	list<Email*> kp = userEmails.at("kieronpeters1@gmail.com");
 	list<Email*>::iterator iter = kp.begin();
 	
@@ -818,6 +916,7 @@ void initialData()
 		cout << "Sender = " << e->print() << endl;
 		iter++;
 	}
+	*/
 
 	// cannot remove until I move the pointer to null as the emails in the list are pointers to these and deleting them, removes them from the list, so set to 0 first
 	email1 = 0;

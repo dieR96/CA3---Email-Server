@@ -1,6 +1,8 @@
 #pragma once
 #include "Email.h"
+#include <list>
 
+using std::list;
 
 // main operations
 void mainMenu();
@@ -21,3 +23,4 @@ void getUserList();
 void getUserEmailList();
 Email* showEmail();
 void doDelete(Email* message);
+void sortBySubject(list<Email*> &searchResults);

@@ -53,6 +53,7 @@ void Email::operator=(const Email &email)
 	setAttachment(email.attachment);
 }
 
+// overloaded boolean equal to operator for all members in the class
 bool Email::operator==(const Email &email)
 {
 	if (this->sender == email.sender && this->recipients == email.recipients && this->dateTime == email.dateTime && this->subject == email.subject && this->body == email.body && this->attachment == email.attachment)
@@ -65,6 +66,7 @@ bool Email::operator==(const Email &email)
 	}
 }
 
+// overloaded not equal to operator
 bool Email::operator!=(const Email &email)
 {
 	if (this->sender != email.sender || this->recipients != email.recipients || this->dateTime != email.dateTime || this->subject != email.subject || this->body != email.body || this->attachment != email.attachment)
@@ -77,12 +79,14 @@ bool Email::operator!=(const Email &email)
 	}
 }
 
+// overloaded output stream operator
 ostream& operator<<(ostream &out, const Email &email)
 {
 	out << "Email = Sender: " << email.sender << " Recipients: " << email.recipients << " date created: " << email.getDateTime() << " Subject: " << email.subject << " Body: " << email.body << " Attachment: " << email.attachment.print();
 	return out;
 }
 
+// overloaded input stream operator
 istream& operator>>(const istream &in, Email &email)
 {
 	// using a static cast to get non-constant istream out
@@ -104,7 +108,7 @@ istream& operator>>(const istream &in, Email &email)
 	return *input;
 }
 
-
+// all member variable getter and setter methods (accessors and mutator methods)
 
 string Email::getSender() const
 {
@@ -157,11 +161,13 @@ void Email::setRecipients(const string recipients)
 	}
 }
 
+// returns string interpretation of time object
 string Email::getDateTime() const 
 {
 	return ctime(&dateTime);
 }
 
+// returns actual time_t object from this class
 time_t Email::getRawDateTime() const
 {
 	return dateTime;
@@ -222,6 +228,8 @@ void Email::setAttachment(const Attachment &attachment)
 	this->attachment = attachment;
 }
 
+// string returned and then can be printed to the screen or used for other purpose if needed
+
 string Email::print()
 {
 	// converting time to valid time format as string later
@@ -233,9 +241,10 @@ string Email::print()
 	stringstream time;
 	time << t;
 
-
 	return "Email: [ sender = " + sender + " Recipients = "  + recipients + " Time Created = " + time.str()  + " Subject = " + subject + " Body = " + body + " Attachment = " + attachment.print() + " ]";
 }
+
+// normal destructor, no dynamic memory to release in this class
 Email::~Email()
 {
 }

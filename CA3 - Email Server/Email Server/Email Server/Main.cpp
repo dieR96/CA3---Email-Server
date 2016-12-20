@@ -15,6 +15,7 @@ using std::endl;
 
 int main()
 {
+	// runs all the methods and data in the server.cpp and server.h files for function prototyping
 	mainMenu();
 	
 	// test on the TemplateQueue that it works in the correct order

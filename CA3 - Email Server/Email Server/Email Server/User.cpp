@@ -93,7 +93,7 @@ istream& operator>>(const istream &in,User &user)
 	return *input;
 }
 
-// getters and setters
+// getters and setters (accessor and mutator methods)
 
 string User::getEmail() const
 {
@@ -149,11 +149,15 @@ void User::setUserName(const string& userName)
 	}
 }
 
+// returns a string representation of this class so the user can print it to the screen or use in other operations
+
 string User::print() const
 {
 	return "User: [ email = " + email + " User Name = " + userName + " Password = " + password  + " ]";
 }
 
+
+// normal destructor for this class, no dynamic memory to relase with delete keyword
 User::~User()
 {
 }

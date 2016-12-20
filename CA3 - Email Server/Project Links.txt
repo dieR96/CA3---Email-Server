@@ -1,0 +1,12 @@
+Google Drive Version Control Link:
+https://drive.google.com/drive/folders/0B1kwSSZPxMqRMEh1ejJoc2NId3M?usp=sharing
+
+General Repository on Github:
+https://github.com/dieR96/CA3
+
+Specific working project shared Repository on GitHub:
+https://github.com/dieR96/CA3---Email-Server
+
+Note -- do not forget before running this project that you need to right-click on
+TemplateQueue.cpp and select properties and set yes on Excluded from Build under general
+tab in order to prevent the program from error that it is already defined.

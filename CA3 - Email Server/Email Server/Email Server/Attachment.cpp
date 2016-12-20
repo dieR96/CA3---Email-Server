@@ -63,7 +63,7 @@ void Attachment::operator=(const Attachment& att)
 }
 
 
-// overloading of operators
+// overloading of class operators
 
 bool Attachment::operator==(const Attachment &att)
 {
@@ -111,7 +111,7 @@ istream& operator>>(const istream &in, Attachment &att)
 }
 
 
-// getters and setters
+// getters and setters (accessor and mutator methods)
 
 
 string Attachment::getFileName() const
@@ -198,6 +198,8 @@ void Attachment::setFileData(string file) // not sure about file data using a ch
 	}
 }
 
+// string interpretation of class object for display on the screen or use as a string
+
 string Attachment::print() const
 {
 	string fileContent = "";
@@ -210,6 +212,7 @@ string Attachment::print() const
 	return "Attachment: [ File Name = " + fileName + "." + fileSuffix + " file contents: = " + fileContent + " ]";
 }
 
+// overloaded destructor deletes the dynamic memory of the class pointer member fileData
 Attachment::~Attachment()
 {
 	delete [] fileData;
